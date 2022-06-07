@@ -38,6 +38,55 @@ class User{
         }
     }
 }
+
+class Item{
+	constructor(barcode,styleNo,size){
+    this.barcode=barcode;
+    this.styleNo=styleNo;
+    this.size=size;
+    }
+
+    fromMap(map) {
+        return new Item(
+            map['barcode']??"",
+            map['styleNo']??"",
+            map['size']??"",
+        );
+      }
+
+    toMap(){
+        return{
+            "barcode":this.barcode,
+            "styleNo":this.styleNo,
+            "size":this.size,
+        }
+    }
+}
+
+class ItemList{
+	constructor(itemlist){
+    this.itemlist=itemlist;
+    }
+
+    fromMap(map) {
+        var formattedList=[];
+        for (let index = 0; index < map.length; index++) { 
+        formattedList.push(new Item().fromMap(map[index]))
+        }    
+        return new ItemList(
+            formattedList
+        )
+      }
+
+    toMap(){
+        return{
+            "barcode":this.barcode,
+            "styleNo":this.styleNo,
+            "size":this.size,
+        }
+    }
+}
+
 exports.testApi = functions.https.onRequest(async(request,response)=>{
     try {
         switch (request.method) {
@@ -55,9 +104,13 @@ exports.testApi = functions.https.onRequest(async(request,response)=>{
                 response.send(stuff);
                 break;
             case 'POST':
+                var receivedStuff = [];
                 const body= request.body;
-                console.log(body['name'])
-                response.send(body.logger)
+                receivedStuff=new ItemList().fromMap(body).itemlist
+                for (let index = 0; index < receivedStuff.length; index++) { 
+                    console.log(receivedStuff[index].barcode)
+                } 
+                response.send(receivedStuff)
                 break;
             case 'DELETE':
                 response.send('Hey this is DELETE');
